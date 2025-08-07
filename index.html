@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Embed Builder</title>
+  <style>
+    body { background: #18191c; color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; }
+    .navbar {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #23272a; padding: 0 32px; height: 60px; box-shadow: 0 2px 8px #0004;
+      position: sticky; top: 0; z-index: 10; animation: navfade 1s;
+    }
+    @keyframes navfade { from { opacity: 0; top: -30px; } to { opacity: 1; top: 0; } }
+    .nav-left { display: flex; align-items: center; }
+    .nav-botpfp { width: 38px; height: 38px; border-radius: 50%; margin-right: 12px; box-shadow: 0 0 12px #0008; }
+    .nav-title { font-size: 1.3rem; font-weight: 600; letter-spacing: 1px; }
+    .nav-right a {
+      color: #fff; text-decoration: none; margin-left: 24px; font-weight: 500; font-size: 1rem; transition: color 0.2s;
+    }
+    .nav-right a:hover { color: #5865f2; }
+    .splash {
+      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      background: #23272a; display: flex; align-items: center; justify-content: center; z-index: 100;
+      transition: opacity 0.5s;
+      animation: splashIn 1s;
+    }
+    @keyframes splashIn { from { opacity: 0; } to { opacity: 1; } }
+    .splash img { width: 120px; height: 120px; border-radius: 50%; box-shadow: 0 0 32px #0008; animation: splashImg 1.2s; }
+    @keyframes splashImg { 0% { transform: scale(0.7); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+    .main { display: flex; min-height: 100vh; animation: mainfade 1.2s; }
+    @keyframes mainfade { from { opacity: 0; } to { opacity: 1; } }
+    .left, .right { flex: 1; padding: 40px 32px; }
+    .left { background: #23272a; max-width: 420px; }
+    .right { background: #18191c; border-left: 1px solid #23272a; }
+    h2 { margin-top: 0; font-size: 2rem; }
+    label { display: block; margin-top: 18px; font-weight: 500; }
+    input, textarea {
+      width: 100%; padding: 8px; margin-top: 6px; border-radius: 4px; border: none;
+      background: #2b2d31; color: #fff; font-size: 1rem;
+    }
+    textarea { resize: vertical; min-height: 60px; }
+    button {
+      margin-top: 18px; padding: 10px 24px; border: none; border-radius: 4px;
+      background: #5865f2; color: #fff; font-size: 1rem; cursor: pointer; font-weight: 600;
+      transition: background 0.2s, transform 0.1s;
+    }
+    button:hover { background: #4752c4; transform: translateY(-2px) scale(1.03); }
+    .section-title { font-size: 1.2rem; margin-bottom: 10px; }
+    .embed-preview {
+      background: #2b2d31;
+      border-left: 4px solid #5865f2;
+      border-radius: 8px;
+      padding: 18px 24px 18px 20px;
+      margin-top: 12px;
+      min-height: 120px;
+      position: relative;
+      color: #fff;
+      font-size: 15px;
+      box-shadow: 0 2px 8px #0004;
+      max-width: 420px;
+      word-break: break-word;
+      animation: previewfade 0.7s;
+    }
+    @keyframes previewfade { from { opacity: 0; transform: translateY(20px);} to { opacity: 1; transform: none; } }
+    .embed-author { display: flex; align-items: center; margin-bottom: 8px; }
+    .embed-author img { width: 22px; height: 22px; border-radius: 50%; margin-right: 7px; }
+    .embed-title { font-weight: bold; font-size: 18px; margin-bottom: 6px; }
+    .embed-description { margin-bottom: 8px; }
+    .embed-footer { font-size: 12px; color: #b9bbbe; margin-top: 12px; display: flex; align-items: center; }
+    .embed-footer img { width: 18px; height: 18px; border-radius: 50%; margin-right: 6px; }
+    .embed-thumbnail { position: absolute; top: 18px; right: 24px; width: 60px; height: 60px; border-radius: 8px; object-fit: cover; }
+    .embed-image { margin-top: 10px; max-width: 100%; border-radius: 8px; }
+    .code-section { margin-top: 32px; }
+    .code-label { font-weight: 500; margin-bottom: 6px; display: block; }
+    textarea[readonly] { background: #23272a; color: #fff; font-family: 'Consolas', monospace; }
+    .field-row { display: flex; gap: 10px; }
+    .field-row > div { flex: 1; }
+    .fields-list { margin-top: 10px; }
+    .field-item { background: #23272a; border-radius: 4px; padding: 8px 10px; margin-bottom: 6px; display: flex; align-items: center; }
+    .field-item span { flex: 1; }
+    .field-item button { margin: 0 0 0 8px; padding: 2px 8px; font-size: 0.9em; background: #ed4245; }
+    .placeholder-panel { background: #23272a; border-radius: 6px; padding: 12px 14px; margin-top: 18px; }
+    .placeholder-panel span { background: #18191c; color: #b9bbbe; border-radius: 3px; padding: 2px 6px; margin: 2px 4px 2px 0; cursor: pointer; font-size: 0.98em; display: inline-block; }
+    .placeholder-panel span:hover { background: #5865f2; color: #fff; }
+    @media (max-width: 900px) {
+      .main { flex-direction: column; }
+      .left, .right { max-width: 100%; padding: 24px 8vw; }
+      .embed-preview { max-width: 100%; }
+      .navbar { flex-direction: column; height: auto; padding: 12px 8vw; }
+      .nav-right { margin-top: 10px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="navbar">
+    <div class="nav-left">
+      <img class="nav-botpfp" src="https://media.discordapp.net/attachments/1361761860352741648/1397145491308941322/avatars.png?ex=6880a8a2&is=687f5722&hm=be821d9c912c60054db503b16e9df00dcc205c454bb17c8195fcbeb869286003&=&format=webp&quality=lossless" alt="Bot PFP">
+      <div class="nav-title">Embed Builder</div>
+    </div>
+    <div class="nav-right">
+      <a href="https://discord.com/oauth2/authorize?client_id=1137741831967355031&scope=bot" target="_blank">Invite</a>
+      <a href="https://github.com/your-repo/embed-builder" target="_blank">GitHub</a>
+      <a href="#">More</a>
+    </div>
+  </div>
+  <div class="splash" id="splash">
+    <img src="https://media.discordapp.net/attachments/1361761860352741648/1397145491308941322/avatars.png?ex=6880a8a2&is=687f5722&hm=be821d9c912c60054db503b16e9df00dcc205c454bb17c8195fcbeb869286003&=&format=webp&quality=lossless" alt="Bot PFP">
+  </div>
+  <div class="main" id="main" style="display:none;">
+    <div class="left">
+      <h2>Embed Builder</h2>
+      <label>Title <input id="title" oninput="generate()"></label>
+      <label>Title URL <input id="titleurl" oninput="generate()"></label>
+      <label>Author <input id="author" oninput="generate()"></label>
+      <label>Author URL <input id="authorurl" oninput="generate()"></label>
+      <label>Author Icon URL <input id="authoricon" oninput="generate()"></label>
+      <label>Content <textarea id="content" oninput="generate()"></textarea></label>
+      <label>Description <textarea id="description" oninput="generate()"></textarea></label>
+      <label>Color <input id="color" type="color" value="#87CEEB" oninput="generate()"></label>
+      <label>Thumbnail URL <input id="thumbnail" oninput="generate()"></label>
+      <label>Image URL <input id="image" oninput="generate()"></label>
+      <label>Footer Text <input id="footer" oninput="generate()"></label>
+      <label>Footer Icon URL <input id="footericon" oninput="generate()"></label>
+      <div>
+        <label>Fields</label>
+        <div class="field-row">
+          <input id="fieldname" placeholder="Name" style="width:40%;" />
+          <input id="fieldvalue" placeholder="Value" style="width:40%;" />
+          <label style="width:auto; margin:0 8px 0 8px; font-size:0.95em;">
+            <input type="checkbox" id="fieldinline" style="width:auto; margin-right:4px;">Inline
+          </label>
+          <button type="button" onclick="addField()" style="margin:0;">Add</button>
+        </div>
+        <div class="fields-list" id="fieldsList"></div>
+      </div>
+      <button onclick="generate();scrollToPreview();">Generate Embed Code</button>
+      <div class="placeholder-panel">
+        <b>Placeholders:</b>
+        <span onclick="insertPlaceholder('{user.name}')">{user.name}</span>
+        <span onclick="insertPlaceholder('{user.mention}')">{user.mention}</span>
+        <span onclick="insertPlaceholder('{server.name}')">{server.name}</span>
+        <span onclick="insertPlaceholder('{server.membercount}')">{server.membercount}</span>
+        <span onclick="insertPlaceholder('{user.id}')">{user.id}</span>
+        <span onclick="insertPlaceholder('{user.avatar}')">{user.avatar}</span>
+        <span onclick="insertPlaceholder('{server.icon}')">{server.icon}</span>
+        <!-- Add more as needed -->
+      </div>
+    </div>
+    <div class="right">
+      <div class="section-title">Preview</div>
+      <div id="embedPreview" class="embed-preview"></div>
+      <div class="code-section">
+        <div class="code-label">Embed Code</div>
+        <textarea id="output" rows="7" readonly></textarea>
+      </div>
+    </div>
+  </div>
+  <script>
+    // Splash logic
+    window.onload = function() {
+      setTimeout(() => {
+        document.getElementById("splash").style.opacity = 0;
+        setTimeout(() => {
+          document.getElementById("splash").style.display = "none";
+          document.getElementById("main").style.display = "flex";
+          generate();
+        }, 500);
+      }, 1800);
+    };
+
+    // Fields logic
+    let fields = [];
+    function addField() {
+      const name = document.getElementById("fieldname").value.trim();
+      const value = document.getElementById("fieldvalue").value.trim();
+      const inline = document.getElementById("fieldinline").checked;
+      if (!name || !value) return;
+      fields.push({ name, value, inline });
+      document.getElementById("fieldname").value = "";
+      document.getElementById("fieldvalue").value = "";
+      document.getElementById("fieldinline").checked = false;
+      renderFields();
+      generate();
+    }
+    function removeField(idx) {
+      fields.splice(idx, 1);
+      renderFields();
+      generate();
+    }
+    function renderFields() {
+      const list = document.getElementById("fieldsList");
+      list.innerHTML = "";
+      fields.forEach((f, i) => {
+        list.innerHTML += `<div class="field-item"><span><b>${escapeHTML(f.name)}</b>: ${escapeHTML(f.value)}${f.inline ? " <i>(inline)</i>" : ""}</span><button onclick="removeField(${i})" type="button">X</button></div>`;
+      });
+    }
+
+    // Placeholders
+    function insertPlaceholder(ph) {
+      const active = document.activeElement;
+      if (active && (active.tagName === "INPUT" || active.tagName === "TEXTAREA")) {
+        const start = active.selectionStart, end = active.selectionEnd;
+        const val = active.value;
+        active.value = val.substring(0, start) + ph + val.substring(end);
+        active.focus();
+        active.selectionStart = active.selectionEnd = start + ph.length;
+        generate();
+      }
+    }
+
+    function escapeHTML(str) {
+      return str.replace(/[&<>"']/g, function(m) {
+        return ({
+          '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        })[m];
+      });
+    }
+    function generate() {
+      const v = id => document.getElementById(id).value.trim();
+      let code = "{embed}";
+      if (v("title")) code += "$v{title: " + v("title") + "}";
+      if (v("titleurl")) code += "$v{titleurl: " + v("titleurl") + "}";
+      if (v("author")) code += "$v{author: " + v("author") + "}";
+      if (v("authorurl")) code += "$v{authorurl: " + v("authorurl") + "}";
+      if (v("authoricon")) code += "$v{authoricon: " + v("authoricon") + "}";
+      if (v("content")) code += "$v{content: " + v("content") + "}";
+      if (v("description")) code += "$v{description: " + v("description") + "}";
+      if (v("color")) code += "$v{color: " + v("color") + "}";
+      if (v("thumbnail")) code += "$v{thumbnail: " + v("thumbnail") + "}";
+      if (v("image")) code += "$v{image: " + v("image") + "}";
+      if (v("footer")) code += "$v{footer: text: " + v("footer") + "}";
+      if (v("footericon")) code += "$v{footericon: " + v("footericon") + "}";
+      if (fields.length) {
+        code += "$v{fields: " + encodeURIComponent(JSON.stringify(fields)) + "}";
+      }
+      document.getElementById("output").value = code;
+
+      // --- Live Preview ---
+      const preview = document.getElementById("embedPreview");
+      let html = "";
+      preview.style.borderLeftColor = v("color") || "#5865f2";
+      // Author
+      if (v("author")) {
+        html += `<div class="embed-author">`;
+        if (v("authoricon")) html += `<img src="${escapeHTML(v("authoricon"))}" alt="author icon">`;
+        if (v("authorurl")) {
+          html += `<a href="${escapeHTML(v("authorurl"))}" style="color:#fff;text-decoration:underline;" target="_blank">${escapeHTML(v("author"))}</a>`;
+        } else {
+          html += `<span>${escapeHTML(v("author"))}</span>`;
+        }
+        html += `</div>`;
+      }
+      // Title
+      if (v("title")) {
+        if (v("titleurl")) {
+          html += `<div class="embed-title"><a href="${escapeHTML(v("titleurl"))}" style="color:#fff;text-decoration:underline;" target="_blank">${escapeHTML(v("title"))}</a></div>`;
+        } else {
+          html += `<div class="embed-title">${escapeHTML(v("title"))}</div>`;
+        }
+      }
+      // Content (as description, below title)
+      if (v("content")) html += `<div class="embed-description">${escapeHTML(v("content"))}</div>`;
+      // Description (below content)
+      if (v("description")) html += `<div class="embed-description">${escapeHTML(v("description"))}</div>`;
+      // Fields
+      if (fields.length) {
+        html += `<div style="margin-top:10px;">`;
+        fields.forEach(f => {
+          html += `<div style="margin-bottom:4px;"><b>${escapeHTML(f.name)}</b>: ${escapeHTML(f.value)}${f.inline ? " <i>(inline)</i>" : ""}</div>`;
+        });
+        html += `</div>`;
+      }
+      // Thumbnail
+      if (v("thumbnail")) html += `<img class="embed-thumbnail" src="${escapeHTML(v("thumbnail"))}" alt="thumbnail">`;
+      // Image
+      if (v("image")) html += `<img class="embed-image" src="${escapeHTML(v("image"))}" alt="embed image">`;
+      // Footer
+      if (v("footer") || v("footericon")) {
+        html += `<div class="embed-footer">`;
+        if (v("footericon")) html += `<img src="${escapeHTML(v("footericon"))}" alt="footer icon">`;
+        if (v("footer")) html += `<span>${escapeHTML(v("footer"))}</span>`;
+        html += `</div>`;
+      }
+      preview.innerHTML = html;
+    }
+    function scrollToPreview() {
+      document.getElementById("embedPreview").scrollIntoView({ behavior: "smooth" });
+    }
+  </script>
+</body>
+</html>
